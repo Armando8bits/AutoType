@@ -1,8 +1,8 @@
 /* INICIO 28 FEBRERO 2023 - TERMINADO EL 2 DE MARZO DE 2023 POR ROQUE ARMANDO RAMIREZ P
-LO QUERIA HACER EN C++ COMO DESAFIO PERSONAL Y PARA TENER UN MEJOR RENDIMIENTO YA QUE EL DE PYTHON ERA BUENO PERO, 
+LO QUERIA HACER EN C++ COMO DESAFIO PERSONAL Y PARA TENER UN MEJOR RENDIMIENTO YA QUE EL DE PYTHON ERA BUENO PERO,
 NO PODIA COPIAR PALABRAS CON ACENTOS Y CARACTERES ESPECIALES, ADEMAS QUE PARA INICARLO, TENIA QUE EJECUTAR EL INTERPRETE
 Y ESO ME QUITABA TIEMPO.
-ESTE PROYECTO PUEDE SER MEJOR SU EN LUGAR DE OBTENER EL ASCCI DE CADA CARACTER, OPTIENE DIRECTAMENTE EL HEX 
+ESTE PROYECTO PUEDE SER MEJOR SU EN LUGAR DE OBTENER EL ASCCI DE CADA CARACTER, OPTIENE DIRECTAMENTE EL HEX
 
 Codigo de ventana sacado de: https://www.codigazo.com/en-c/codigo-ejemplo-crear-ventana-en-c
 ayuda para las claves de las teclas: https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
@@ -27,12 +27,14 @@ ayudas para completar el proyecto: https://batchloaf.wordpress.com/2014/10/02/us
 #define Btn3 103 // boton copiar
 #define Btn4 104 // boton pegar
 #define ID_EDIT1 105
+#define ID_LINK 106 // label de mi nombre que abre link a Github
 
 HWND CmdTipear;
 HWND CmdLimpiar;
 HWND CmdCopiar;
 HWND CmdPegar;
 HWND TxtcajaTexto;
+HWND LblLink; // label de mi nombre que abre link a Github
 
 void TipeaTexto(wchar_t *Caracter, int Largo);
 void EjecutarHotKey(int Tecla1, int Tecla2);
@@ -93,9 +95,10 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
     // CREA LOS LABELS QUE NO SE MODIFICAN:
     CreateWindowW(L"Static", L"Copie el texto a Tipear Aquí:", WS_VISIBLE | WS_CHILD | ES_LEFT, 55, 5, 200, 20, ventana1, 0, 0, 0);
-    CreateWindowW(L"Static", L"Creado por: Armando Ramírez", WS_VISIBLE | WS_CHILD | ES_LEFT, 55, 285, 200, 20, ventana1, 0, 0, 0);
-    // crea el textBox
-    TxtcajaTexto = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL, 0, 25, 300, 220, ventana1, (HMENU)ID_EDIT1, 0, 0);
+    LblLink = CreateWindowW(L"Static", L"Creado por: Armando Ramírez", WS_VISIBLE | WS_CHILD | ES_LEFT | SS_NOTIFY, 55, 285, 200, 20, ventana1, (HMENU)ID_LINK, 0, 0);
+    SetClassLongPtr(LblLink, GCLP_HCURSOR, (LONG_PTR)LoadCursor(NULL, IDC_HAND)); // Establecer el cursor del ratón como mano al pasar sobre el label
+                                                                                  // crea el textBox
+    TxtcajaTexto = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL, 0, 25, 300, 220, ventana1, (HMENU)ID_EDIT1, 0, 0);
     // creamos botones
     CmdTipear = CreateWindowEx(0, "button", "Tipear Texto", WS_VISIBLE | WS_CHILD | 0, 5, 250, 100, 25, ventana1, (HMENU)Btn1, 0, 0);
     CmdLimpiar = CreateWindowEx(0, "button", "Limpiar", WS_VISIBLE | WS_CHILD | 0, 106, 250, 60, 25, ventana1, (HMENU)Btn2, 0, 0);
@@ -171,6 +174,11 @@ LRESULT CALLBACK WindowProcedure(HWND ventana1, UINT mensajecomunica, WPARAM wPa
         {
             SetFocus(TxtcajaTexto);
             EjecutarHotKey(VK_CONTROL, 0x56); // Ctrl + V; PEga texto
+        }
+        else if (LOWORD(ID_LINK) == wParam)
+        {
+            // Abrir el enlace en el navegador predeterminado al hacer click en label
+            ShellExecute(NULL, "open", "https://github.com/Armando8bits", NULL, NULL, SW_SHOWNORMAL);
         }
         break;
     case WM_CLOSE:               /* Que hacer en caso de recibir el mensaje WM_CLOSE*/
