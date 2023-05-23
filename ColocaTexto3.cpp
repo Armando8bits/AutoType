@@ -11,11 +11,14 @@ ayudas para completar el proyecto: https://batchloaf.wordpress.com/2014/10/02/us
                                 https://batchloaf.wordpress.com/2012/10/18/simulating-a-ctrl-v-keystroke-in-win32-c-or-c-using-sendinput/
                                 https://batchloaf.wordpress.com/2012/04/17/simulating-a-keystroke-in-win32-c-or-c-using-sendinput/
 
-
+Modificado el 22 de Mayo de 2023, la funcion de tipeo trabaja dentro de un hilo para en teoria mejorar el rendimiento y evitar
+congelamiento por segundos de la musica que se escuchaba en equipos de bajos recursos, hay que segui haciendo pruebas a ver si
+en verdad mejora el rendimiento...
  */
 
 #define _WIN32_WINNT 0x0500 // Es necesaria esta definicion para esconder ventana de consola
 #include <windows.h>        // Libreria que contiene las funciones de Winapi
+#include <thread>           //para hablitar hilos
 // #include <cstdio>
 //  #include <string>
 //  #include <wchar.h>
@@ -150,7 +153,9 @@ LRESULT CALLBACK WindowProcedure(HWND ventana1, UINT mensajecomunica, WPARAM wPa
             GetWindowTextW(TxtcajaTexto, pText, nLength + 1); // obtengo el texto del textbox
             EjecutarHotKey(VK_MENU, VK_TAB);                  // pretende dar foco a la ventana anterior
             Sleep(1000);                                      // aguanta un segundo por si el equipo es lento al cambiar ventana
-            TipeaTexto(pText, nLength);                       // HACE LA MAGIA
+            //TipeaTexto(pText, nLength);                     // HACE LA MAGIA
+            std::thread hilo(TipeaTexto, pText, nLength);     // inicia el Hilo con la función que hace el tipeo
+            hilo.join();                                      // Esperar a que el hilo termine su ejecución
             // SetWindowText(TxtcajaTexto, Sabana); //cadena normal en textbox
             //  SetWindowTextW(TxtcajaTexto, pText); // coloca cadena UNICODE en textbox
             delete[] pText;
