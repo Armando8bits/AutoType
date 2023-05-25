@@ -16,6 +16,7 @@ ayudas para completar el proyecto: https://batchloaf.wordpress.com/2014/10/02/us
 
 #define _WIN32_WINNT 0x0500 // Es necesaria esta definicion para esconder ventana de consola
 #include <windows.h>        // Libreria que contiene las funciones de Winapi
+#include <vector>           // Para utilizar std::vector
 // #include <cstdio>
 //  #include <string>
 //  #include <wchar.h>
@@ -200,30 +201,39 @@ void TipeaTexto(wchar_t *Cadena, int Largo)
 {
     INPUT ip;
     ip.type = INPUT_KEYBOARD;
-    ip.ki.time = 0;
     ip.ki.dwExtraInfo = 0;
-    ip.ki.wVk = 0; // estaba en el bucle pero la saque para agilizar el bucle
+    ip.ki.wVk = 0; // Inicializar el valor una vez fuera del bucle
+
+    std::vector<INPUT> inputBuffer; // Búfer para acumular las teclas presionadas
 
     for (int indice = 0; indice < Largo; indice++)
     {
         wchar_t actual = Cadena[indice];
-        int CodAscii = int(actual); // convierte el caracter a ASCII (int)
+        int CodAscii = int(actual); // Convierte el carácter a ASCII (int)
+
         if (CodAscii == 13)
         {
-            EjecutarHotKey(VK_RETURN, 0);
-            continue; // salta esta iteracion del for
-        }
-        // Press a unicode "key"
-        ip.ki.dwFlags = KEYEVENTF_UNICODE;
-        // ip.ki.wVk = 0; //para agilizar el bucle, la saqué afuera sin fallos
-        ip.ki.wScan = CodAscii; // es mejor si pones un codigo Hexadecimal en lugar de ascii
-        SendInput(1, &ip, sizeof(INPUT));
+            /*EjecutarHotKey(VK_RETURN, 0);
+            continue; */
+            CodAscii=32; //reemplaza el salto de linea por un Espacio
+            /*La unica falla es que deja dos espacios al inicio del parrafo, hay que averiguar como 
+            se llama el caracter que va junto al enter para omitirlo, creo que esa es la falla*/
+        } 
 
-        // Release key
+        // Presionar una "tecla" Unicode
+        ip.ki.dwFlags = KEYEVENTF_UNICODE;
+        ip.ki.wScan = CodAscii; // Es mejor utilizar un código hexadecimal en lugar de ASCII
+
+        // Acumular la tecla presionada en el búfer
+        inputBuffer.push_back(ip);
+
+        // Liberar la tecla en el búfer
         ip.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-        SendInput(1, &ip, sizeof(INPUT));
-        if (indice % 20 == 0) Sleep(1); //cada (multimplos de 20) letras descansa un milisegundo para no saturar el procesador
+        inputBuffer.push_back(ip);
     }
+
+    // Enviar todas las teclas presionadas de una vez
+    SendInput(inputBuffer.size(), inputBuffer.data(), sizeof(INPUT));
 }
 
 void EjecutarHotKey(int Tecla1, int Tecla2)
