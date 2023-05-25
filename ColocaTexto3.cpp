@@ -222,6 +222,7 @@ void TipeaTexto(wchar_t *Cadena, int Largo)
         // Release key
         ip.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
         SendInput(1, &ip, sizeof(INPUT));
+        if (indice % 20 == 0) Sleep(1); //cada (multimplos de 20) letras descansa un milisegundo para no saturar el procesador
     }
 }
 
